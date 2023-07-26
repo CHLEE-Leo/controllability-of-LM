@@ -193,11 +193,11 @@ After running the code, check out the ``results`` directory. Then, you can see t
 If you would like to put some customized prefixes (i.e., prompts) as inputs to our model, then open ``evaluate_LLM.sh`` file and enter your own prefixes in the ``--test_prefix`` argument as below
 ![Alt text](image-4.png)
 
-Similarly, if you want to see the generated results without reward dropout, revise ``--dropout=quantile`` to ``--dropout=None``, and ``--dropout_rate=0.95`` to ``--dropout_rate=0.0`` arguments in ``evaluate_LLM.sh`` file as below
+Also, if you want to see the generated results without reward dropout, then revise ``--dropout=quantile`` to ``--dropout=None``, and ``--dropout_rate=0.95`` to ``--dropout_rate=0.0`` arguments in ``evaluate_LLM.sh`` file as below
 ![Alt text](image-5.png)
 
-## 4) Total Result
+## 4) Total results of benchmark experiments
 Under ``results`` directory, you can find ``final_result_table.csv`` file. It is a file that aggregates all the results of our benchmark experiments. Table 1 in our paper was written based on this file.
 
-## 5) Human Evaluation Result
+## 5) Human evaluation result
 Under ``results`` directory, you can find ``real_fake_total_df.csv`` and ``final_result_real_label_total_df.csv`` files. They are the files that contain the result of human evaluation. 
