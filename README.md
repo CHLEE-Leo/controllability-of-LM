@@ -178,7 +178,7 @@ gpt2_model = TFAutoModelForCausalLM.from_pretrained("gpt2")
 ```
 
 ## 2) Running our models
-Completing preparing datasets, running the below code to reproduce the results of benchmark expriments. **This code reproduces Table 4 in appendix of our paper.**
+Completing preparing datasets, running the below code to reproduce the results of benchmark expriments. **This code reproduces Table 4 in the appendix of our paper.**
 ```
 sh evaluate_LLM.sh
 ```
@@ -196,4 +196,4 @@ Also, if you want to see the generated results without reward dropout, then revi
 Under ``results`` directory, you can find ``final_result_table.csv`` file. It is a file that aggregates all the results of our benchmark experiments. **Table 1 in our paper was written based on this file.**
 
 ## 5) Human evaluation result
-Under ``results`` directory, you can find ``real_fake_total_df.csv`` and ``final_result_real_label_total_df.csv`` files. They are the files that contain the result of human evaluation. **Figure 10 in appendix of our paper was plotted based on those files.** 
+Under ``results`` directory, you can find ``real_fake_total_df.csv`` and ``final_result_real_label_total_df.csv`` files. They are the files that contain the result of human evaluation. **Figure 10 in the appendix of our paper was plotted based on those files.** 
