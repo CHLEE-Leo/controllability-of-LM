@@ -166,7 +166,7 @@ For Google Drive capacity reasons, we upload ``weights.tar.gz`` that contains on
 
 It will take some time to download, save and upzip ``weights.tar.gz`` to the weights folder.
 
-<!-- Note that we provide ``pretrained_weights.tar.gz`` as zipped file for your convenience, but you can download it directly from Huggingface:
+Note that we provide ``pretrained_weights.tar.gz`` as zipped file for your convenience, but you can download it directly from Huggingface:
 ```
 # import GPT2 tokenizer.
 gpt2_tokenizer = AutoTokenizer.from_pretrained("gpt2",
@@ -175,7 +175,7 @@ gpt2_tokenizer = AutoTokenizer.from_pretrained("gpt2",
 
 # import GPT2 model.
 gpt2_model = TFAutoModelForCausalLM.from_pretrained("gpt2")
-``` -->
+```
 
 ## 2) Running our models
 Completing preparing datasets, running the below code to reproduce the results of benchmark expriments. This code reproduces Table 4 in appendix of our paper.
