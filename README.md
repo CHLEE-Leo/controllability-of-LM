@@ -141,7 +141,7 @@ Note that $i \in [1, 10]$ sets all positions from 1 to 10 as rewarding positions
 You can *reproduce the benchmark experiments* described in the paper by running the below codes:
 
 ## 1) Preparing datasets
-For benchmark experiments, first download the ``datasets.tar.gz``, ``pretrained_weights.tar.gz``, and ``weights.tar.gz`` in our [Google Drive](https://drive.google.com/drive/folders/1qOWjtDq8Ry2QRdKZvyGzSetFF-lggz7M?usp=drive_link). After then, store and unzip them at the corresponding folders named ``prep_data``, ``pretrained_weights``, and ``weights``, respectively, as below:
+For benchmark experiments, first download the ``datasets.tar.gz``, and ``weights.tar.gz`` in our [Google Drive](https://drive.google.com/drive/folders/1qOWjtDq8Ry2QRdKZvyGzSetFF-lggz7M?usp=drive_link). After then, store and unzip them at the corresponding folders named ``prep_data`` and ``weights``, respectively, as below:
 ```
 # After store the zipped files downloaded from Google drive, then unzip them into the corresponding folders.
 
@@ -166,7 +166,7 @@ For Google Drive capacity reasons, we upload ``weights.tar.gz`` that contains on
 
 It will take some time to download, save and upzip ``weights.tar.gz`` to the weights folder.
 
-Note that we provide ``pretrained_weights.tar.gz`` as zipped file for your convenience, but you can download it directly from Huggingface:
+<!-- Note that we provide ``pretrained_weights.tar.gz`` as zipped file for your convenience, but you can download it directly from Huggingface:
 ```
 # import GPT2 tokenizer.
 gpt2_tokenizer = AutoTokenizer.from_pretrained("gpt2",
@@ -175,10 +175,6 @@ gpt2_tokenizer = AutoTokenizer.from_pretrained("gpt2",
 
 # import GPT2 model.
 gpt2_model = TFAutoModelForCausalLM.from_pretrained("gpt2")
-```
-<!-- Once you downloaded and saved our dataset the right way, create conda environment by importing `settings.yaml` as below:
-```
-conda env create -f settings.yaml
 ``` -->
 
 ## 2) Running our models
