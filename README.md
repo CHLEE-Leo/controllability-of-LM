@@ -54,7 +54,7 @@ python3 pos_game_data.py --mode=gen --num_epi=5000 --min_reward_action=6 --rewar
 - *``--mode=gen`` option indicates that 10-turn positioning game is simulated to generate the episodes, i.e., trajectories, of behavior agent.*
 - *``--num_epi=5000`` option configures the total number of simulated episodes to be 5000.*
 - *``--min_reward_action=6`` option configures the 10-turn positioning game where rewards are only collectable at positions from 6 to 10. Note that the position is defined as an integer number between 0 to 10.*
-- *``--reward_order=16`` option shapes the reward distribution to follow 16 ($= 2^4$)-th order function.* 
+- *``--reward_order=16`` option shapes the reward distribution to follow 16* ($= 2^4$)*-th order function.* 
 
 Since the 10-turn positioning game forces the length of episode to be 10, the total number of position changes for the behavior agent is $50000 (= 10 \times 5000)$. 
 
@@ -85,7 +85,7 @@ sh train_pos_game_agent.sh
 - *``--batch_size=1`` option sets the batch size of the target agent to be 1e-05.*
 - *``--lr=1e-05`` option sets the learning rate of the target agent to be 1e-05.*
 - *``--num_epoch=1`` option sets the number of training epoch for the target agent to be 1.*
-- *``--case=0`` option determines the simulated data of specific behavior agent to be learned by the target agent. In other words, it specifies the pre-defined combination of $\mu$ and $\sigma$ of the behavioral agent that the target agent will learn from. Since only 6 cases are considered in the paper, the 0, 1, 2, 3, 4, and 5 arguments are allowed for this option.*
+- *``--case=0`` option determines the simulated data of specific behavior agent to be learned by the target agent. In other words, it specifies the pre-defined combination of* $\mu$ *and* $\sigma$ *of the behavioral agent that the target agent will learn from. Since only 6 cases are considered in the paper, the 0, 1, 2, 3, 4, and 5 arguments are allowed for this option.*
 - *``--min_reward_action=6`` option specifies that the target agent will be trained on the simulated data where rewards are only collectable at positions from 6 to 10.*
 - *``--reward_order=16`` option specifies that the target agent will be trained on the simulated data where reward distribution follows 16 ($= 2^4$)-th order function.*
 
