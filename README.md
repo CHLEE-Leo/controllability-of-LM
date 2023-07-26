@@ -87,7 +87,7 @@ sh train_pos_game_agent.sh
 - *``--num_epoch=1`` option sets the number of training epoch for the target agent to be 1.*
 - *``--case=0`` option determines the simulated data of specific behavior agent to be learned by the target agent. In other words, it specifies the pre-defined combination of* $\mu$ *and* $\sigma$ *of the behavioral agent that the target agent will learn from. Since only 6 cases are considered in the paper, the 0, 1, 2, 3, 4, and 5 arguments are allowed for this option.*
 - *``--min_reward_action=6`` option specifies that the target agent will be trained on the simulated data where rewards are only collectable at positions from 6 to 10.*
-- *``--reward_order=16`` option specifies that the target agent will be trained on the simulated data where reward distribution follows 16 ($= 2^4$)-th order function.*
+- *``--reward_order=16`` option specifies that the target agent will be trained on the simulated data where reward distribution follows 16* ($= 2^4$)*-th order function.*
 
 Note that you can change ``CUDA_VISIBLE_DEVICES=0`` command depending on the GPU availability in your server.
 
