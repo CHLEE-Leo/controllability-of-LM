@@ -102,41 +102,41 @@ weights/*
 results/position-game/*
 !results/position-game/.gitkeep
 
-# results/emotion-1/*
+results/emotion-1/*
 # !results/emotion-1/.gitkeep
-# results/emotion-2/*
+results/emotion-2/*
 # !results/emotion-2/.gitkeep
-# results/emotion-3/*
+results/emotion-3/*
 # !results/emotion-3/.gitkeep
-# results/emotion-4/*
+results/emotion-4/*
 # !results/emotion-4/.gitkeep
-# results/emotion-5/*
+results/emotion-5/*
 # !results/emotion-5/.gitkeep
-# results/emotion-6/*
+results/emotion-6/*
 # !results/emotion-6/.gitkeep
 
-# results/politeness-0/*
+results/politeness-0/*
 # !results/politeness-0/.gitkeep
-# results/politeness-1/*
+results/politeness-1/*
 # !results/politeness-1/.gitkeep
 
-# results/sentiment-0/*
+results/sentiment-0/*
 # !results/sentiment-0/.gitkeep
-# results/sentiment-1/*
+results/sentiment-1/*
 # !results/sentiment-1/.gitkeep
 
-# results/topic-0/*
+results/topic-0/*
 # !results/topic-0/.gitkeep
-# results/topic-1/*
+results/topic-1/*
 # !results/topic-1/.gitkeep
-# results/topic-2/*
+results/topic-2/*
 # !results/topic-2/.gitkeep
-# results/topic-3/*
+results/topic-3/*
 # !results/topic-3/.gitkeep
 
-# results/toxicity-0/*
+results/toxicity-0/*
 # !results/toxicity-0/.gitkeep
-# results/toxicity-1/*
+results/toxicity-1/*
 # !results/toxicity-1/.gitkeep
 
 # results/*
