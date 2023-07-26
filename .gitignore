@@ -58,26 +58,26 @@ data/*
 # ---------------------------------------------------------------------------- #
 # 3) prep_data 폴더의 하위폴더들 무시 (단 .gitkeep 사용하여 특정 폴더는 살려두기)
 
-prep_data/*
+# prep_data/*
 prep_data/datasets.tar.gz
 !prep_data/.gitkeep
 
-# prep_data/act/*
+prep_data/act/*
 # !prep_data/act/.gitkeep
 
-# prep_data/emotion/*
+prep_data/emotion/*
 # !prep_data/emotion/.gitkeep
 
-# prep_data/politeness/*
+prep_data/politeness/*
 # !prep_data/politeness/.gitkeep
 
-# prep_data/sentiment/*
+prep_data/sentiment/*
 # !prep_data/sentiment/.gitkeep
 
-# prep_data/topic/*
+prep_data/topic/*
 # !prep_data/topic/.gitkeep
 
-# prep_data/toxicity/*
+prep_data/toxicity/*
 # !prep_data/toxicity/.gitkeep
 
 prep_data/position-game/*
