@@ -40,10 +40,6 @@ my_test_prefix = args.test_prefix
 # my_dropout_rate = 0.2
 
 parent_dir = str(Path(os.getcwd()).parents[0])
-PARAM_DIR = parent_dir + '/params' + '/' + str(my_dataset) + '/' + str(my_model)
-PARAM_DIR = glob.glob(PARAM_DIR + '/*{}**{}**{}*'.format(my_decoding, my_dropout, my_dropout_rate))[0]
-with open(PARAM_DIR + '/kwargs.json', 'r') as f:
-    kwargs = json.load(f)
 
 '''
 데이터 셋팅
@@ -147,6 +143,16 @@ if my_task == 'train_eval':
 
 # 평가 성능 검증
 elif my_task == 'test_eval':
+
+    '''
+    파라미터 변수 (kwargs) 선언
+    '''
+    PARAM_DIR = parent_dir + '/params' + '/' + str(my_dataset) + '/' + str(my_model)
+    PARAM_DIR = glob.glob(PARAM_DIR + '/*{}**{}**{}*'.format(my_decoding, my_dropout, my_dropout_rate))[0]
+    with open(PARAM_DIR + '/kwargs.json', 'r') as f:
+        kwargs = json.load(f)
+
+
     '''
     타겟 모델 로드
     '''

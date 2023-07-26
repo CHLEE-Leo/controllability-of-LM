@@ -160,7 +160,7 @@ tar -zxvf weights.tar.gz        # unzip datasets.tar.gz file.
 
 For Google Drive capacity reasons, we upload ``weights.tar.gz`` that contains only the weights trained by the hyperparameter settings below:
 - dataset : *sentiment*, *topic*, *emtion*
-- decoding : *stochastic*
+- decoding : *None*, *stochastic*
 - dropout : *quantile*
 - dropout rate : *0.95*
 
@@ -193,9 +193,14 @@ After running the code, check out the ``results`` directory. Then, you can see t
 If you would like to put some customized prefixes (i.e., prompts) as inputs to our model, then open ``evaluate_LLM.sh`` file and enter your own prefixes in the ``--test_prefix`` argument as below
 ![Alt text](image-4.png)
 
+Similarly, if you want to see the generated results without reward dropout, revise ``--dropout=quantile`` to ``--dropout=None``, and ``--dropout_rate=0.95`` to ``--dropout_rate=0.0`` arguments in ``evaluate_LLM.sh`` file as below
+![Alt text](image-5.png)
+
 ```
-ddd
+python3 main_LLM.py --my_seed=47 --task=train_eval --model=gpt2_small --dataset=ALL
 ```
+![Alt text](image-6.png)
+
 
 ## 3) Plotting the results
 ```
