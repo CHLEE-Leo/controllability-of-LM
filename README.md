@@ -196,19 +196,8 @@ If you would like to put some customized prefixes (i.e., prompts) as inputs to o
 Similarly, if you want to see the generated results without reward dropout, revise ``--dropout=quantile`` to ``--dropout=None``, and ``--dropout_rate=0.95`` to ``--dropout_rate=0.0`` arguments in ``evaluate_LLM.sh`` file as below
 ![Alt text](image-5.png)
 
-```
-python3 main_LLM.py --my_seed=47 --task=train_eval --model=gpt2_small --dataset=ALL
-```
-![Alt text](image-6.png)
-
-
-## 3) Plotting the results
-```
-sh plot_train_reward_all.sh
-```
-
-## 4) Training models
-#literate-engine
+## 4) Total Result
+Under ``results`` directory, you can find ``final_result_table.csv`` file. It is a file that aggregates all the results of our benchmark experiments. Table 1 in our paper was written based on this file.
 
 ## 5) Human Evaluation Result
 Under ``results`` directory, you can find ``real_fake_total_df.csv`` and ``final_result_real_label_total_df.csv`` files. They are the files that contain the result of human evaluation. 

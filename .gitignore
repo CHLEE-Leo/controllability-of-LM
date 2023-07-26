@@ -141,7 +141,6 @@ results/position-game/*
 !results/position-game/.gitkeep
 
 # results/*
-results/final_result_table.csv
 !results/.gitkeep
 
 # # 7)
