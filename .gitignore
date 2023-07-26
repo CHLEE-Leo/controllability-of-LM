@@ -4,7 +4,6 @@ preprocess_new.py
 utils_for_preprocess.py
 *.pdf
 *.jpg
-image-*.png
 figure1.pdf
 
 # ---------------------------------------------------------------------------- #
@@ -140,5 +139,5 @@ results/position-game/*
 # results/toxicity-1/*
 # !results/toxicity-1/.gitkeep
 
-# 7)
-params/*
+# # 7)
+# params/*

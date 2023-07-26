@@ -158,15 +158,15 @@ cd ./weights                    # move to weights directory.
 tar -zxvf weights.tar.gz        # unzip datasets.tar.gz file.
 ```
 
-Note that for Google Drive capacity reasons, *weights.tar.gz* only provides a zipped file of the weights for the hyperparameter settings below:
+For Google Drive capacity reasons, *weights.tar.gz* contains only the weights trained by the hyperparameter settings below:
 - dataset : *sentiment*, *topic*, *emtion*
 - decoding : *stochastic*
 - dropout : *quantile*
 - dropout rate : *0.95*
 
-Even with these limited settings, it will take some time to download ``weights.tar.gz``, save and upzip it to the weights folder.
+It will take some time to download, save and upzip ``weights.tar.gz`` to the weights folder.
 
-Also note that we provide ``pretrained_weights.tar.gz`` as zipped file for your convenience, but you can download it directly from Huggingface:
+Note that we provide ``pretrained_weights.tar.gz`` as zipped file for your convenience, but you can download it directly from Huggingface:
 ```
 # import GPT2 tokenizer.
 gpt2_tokenizer = AutoTokenizer.from_pretrained("gpt2",
