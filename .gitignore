@@ -85,7 +85,7 @@ prep_data/position-game/*
 
 # 4) pretrained_weights 폴더의 파일들 무시 (단 .gitkeep 사용하여 특정 폴더는 살려두기)
 pretrained_weights/*
-# !pretrained_weights/.gitkeep
+!pretrained_weights/.gitkeep
 
 # 5) weights 폴더의 파일들 무시 (단 .gitkeep 사용하여 특정 폴더는 살려두기)
 weights/*
