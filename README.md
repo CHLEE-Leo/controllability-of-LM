@@ -121,7 +121,7 @@ To  do that, running the code below:
 ```
 CUDA_VISIBLE_DEVICES=0 python3 pos_game_data.py --mode=test --num_epi=5000 --batch_size=1 --lr=1e-05 --num_epoch=1 --min_reward_action=6 --reward_order=16
 ```
-Running this code will generate a file named *"figure1_1e-05_1_5_mra=6_ro=16.pdf"* that reproduces Figure 2(b) in the paper.
+Running this code will generate a file named ``figure1_1e-05_1_5_mra=6_ro=16.pdf`` that reproduces Figure 2(b) in our paper.
 
 ### 5) Conducting additional analysis
 We have analyzed the dynamics of target agent given the behavior agent (behavior policy) is fixed while the different reward distribution was set up according to the power of 2 at $i \in [1, 10]$.
@@ -130,7 +130,7 @@ To visualize the result of analysis, running the code below:
 ```
 sh plot_additional_analysis.sh
 ```
-Running this code will generate a file named *"4col_figure1_1e-05_1_5_mra=1_ro=16.pdf"* that reproduces Figure 3 in the paper.
+Running this code will generate a file named ``4col_figure1_1e-05_1_5_mra=1_ro=16.pdf`` that reproduces Figure 3 in our paper.
 
 Note that $i \in [1, 10]$ sets all positions from 1 to 10 as rewarding positions. However, as the reward distribution becomes more and more skewed, that is, as the order of the reward function increases, some positions turn into zero-reward positions where the reward converges to zero.
 
@@ -158,7 +158,7 @@ cd ./weights                    # move to weights directory.
 tar -zxvf weights.tar.gz        # unzip datasets.tar.gz file.
 ```
 
-For Google Drive capacity reasons, *weights.tar.gz* contains only the weights trained by the hyperparameter settings below:
+For Google Drive capacity reasons, we upload ``weights.tar.gz`` that contains only the weights trained by the hyperparameter settings below:
 - dataset : *sentiment*, *topic*, *emtion*
 - decoding : *stochastic*
 - dropout : *quantile*
@@ -181,12 +181,21 @@ gpt2_model = TFAutoModelForCausalLM.from_pretrained("gpt2")
 conda env create -f settings.yaml
 ``` -->
 
-## 2) Running models
-After completing preparing datasets, running the below code reproduces Tables 1 and 2 in the paper.
+## 2) Running our models
+Completing preparing datasets, running the below code to reproduce the results of benchmark expriments. This code reproduces Table 4 in appendix of our paper.
 ```
 sh evaluate_LLM.sh
 ```
-Note that the *weights.tar.gz* file contains only limited settings (as mentioned in *preparing datasets* step), so ``sh evaluate_LLM.sh`` will only reproduce Tables 1 and 2 for those settings.
+After running the code, check out the ``results`` directory. Then, you can see that sub-directories named by dataset-label pair (e.g., ``emotion-1``) were created, and there is ``gen_samples.txt`` file within each sub-directory. This text file contains the generated results.
+
+- Since the ``weights.tar.gz`` file contains only the weights of limited hyperparameter settings (as we mentioned in *preparing datasets* step), ``sh evaluate_LLM.sh`` will reproduce the Table 4 only for those limited settings.
+
+If you would like to put some customized prefixes (i.e., prompts) as inputs to our model, then open ``evaluate_LLM.sh`` file and enter your own prefixes in the ``--test_prefix`` argument as below
+![Alt text](image-4.png)
+
+```
+ddd
+```
 
 ## 3) Plotting the results
 ```
@@ -195,3 +204,6 @@ sh plot_train_reward_all.sh
 
 ## 4) Training models
 #literate-engine
+
+## 5) Human Evaluation Result
+Under ``results`` directory, you can find ``real_fake_total_df.csv`` and ``final_result_real_label_total_df.csv`` files. They are the files that contain the result of human evaluation. 
