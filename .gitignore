@@ -93,8 +93,6 @@ weights/*
 
 # ---------------------------------------------------------------------------- #
 # 6) results 폴더의 특정 하위폴더들 무시 (단 .gitkeep 사용하여 특정 폴더는 살려두기)
-results/*
-!results/.gitkeep
 # results/emotion/*
 # results/politeness/*
 # results/sentiment/*
@@ -140,6 +138,9 @@ results/position-game/*
 # !results/toxicity-0/.gitkeep
 # results/toxicity-1/*
 # !results/toxicity-1/.gitkeep
+
+# results/*
+!results/.gitkeep
 
 # # 7)
 # params/*
