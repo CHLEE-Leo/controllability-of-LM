@@ -130,7 +130,7 @@ To visualize the result of analysis, running the code below:
 ```
 sh plot_additional_analysis.sh
 ```
-Running this code will generate a file named ``4col_figure1_1e-05_1_5_mra=1_ro=16.pdf`` that **reproduces the second row of Figure 2 in our paper.**
+Running this code will generate a file named ``4col_figure1_1e-05_1_5_mra=1_alpha=15.0_beta=15.0.pdf`` that **reproduces the second row of Figure 2 in our paper.**
 
 or 
 
