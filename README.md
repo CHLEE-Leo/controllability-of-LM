@@ -187,9 +187,11 @@ After running the code, check out the ``results`` directory. Then, you can see t
 - Since the ``weights.tar.gz`` file contains only the weights of limited hyperparameter settings (as we mentioned in *preparing datasets* step), ``sh evaluate_LLM.sh`` will **reproduce the Table 4 only for those limited settings.**
 
 If you would like to put some customized prefixes (i.e., prompts) as inputs to our model, then open ``evaluate_LLM.sh`` file and enter your own prefixes in the ``--test_prefix`` argument as below
+
 ![Alt text](image-4.png)
 
 Also, if you want to see the generated results without reward dropout, then revise ``--dropout=quantile`` to ``--dropout=None``, and ``--dropout_rate=0.95`` to ``--dropout_rate=0.0`` arguments in ``evaluate_LLM.sh`` file as below
+
 ![Alt text](image-5.png)
 
 ## 4) Total results of benchmark experiments
