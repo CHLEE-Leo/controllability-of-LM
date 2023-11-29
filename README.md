@@ -110,15 +110,16 @@ Under ``results`` directory, you can find ``real_fake_total_df.csv`` and ``final
 # Non-pretrained target LM vs. Pretrained target LM
 Running the code below will reproduce Figure 1 (a) w/o initializing $\pi_{\theta}$ to $\beta_{\bar{{\theta}}}$.
 ```
-python3 plot_train_reward_comparison_with_init_model_all.py --plot_model=gpt2_small
-```
-Similarlly, running the code below ill reproduce Figure 1 (b) w/ initializing $\pi_{\theta}$ to $\beta_{\bar{{\theta}}}$.
-
-```
 python3 plot_train_reward_comparison_with_init_model_all.py --plot_model=gpt2_small_init_weight=uniform
 ```
 
-<br/>
+
+Similarlly, running the code below ill reproduce Figure 1 (b) w/ initializing $\pi_{\theta}$ to $\beta_{\bar{{\theta}}}$.
+
+```
+python3 plot_train_reward_comparison_with_init_model_all.py --plot_model=gpt2_small
+```
+
 <br/>
 
 # Performance Comparison across different (pretrained) LLMs
