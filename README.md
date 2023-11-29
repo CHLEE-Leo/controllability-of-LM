@@ -1,5 +1,5 @@
 # README.md
-This repository provides the code, data, and results of the paper titled *"Analyzing the Controllability of Language Models and Improving the Control Performance with Reward Dropout."*
+This repository provides the code, data, and results of the paper titled *"REWARD DROPOUT IMPROVES CONTROL: BI-OBJECTIVE PERSPECTIVE ON REINFORCED LM."*
 
 <br/>
 
