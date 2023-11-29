@@ -1,5 +1,5 @@
 # README.md
-This repository provides the code, data, and results of the paper titled *"REWARD DROPOUT IMPROVES CONTROL: BI-OBJECTIVE PERSPECTIVE ON REINFORCED LM."*
+This repository provides the code, data, and results of the paper titled *"Reward Dropout Improves Control: Bi-objective Perpspective on Reinforced LM."*
 
 <br/>
 
