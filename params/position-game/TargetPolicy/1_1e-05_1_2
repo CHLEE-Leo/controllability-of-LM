@@ -9,5 +9,5 @@
 	"action_size": 10,
 	"epi_len": 10,
 	"num_epoch": 1,
-	"num_cases": 6
+	"num_cases": 9
 }
