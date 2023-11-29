@@ -39,7 +39,7 @@ def get_params():
 
     # 필수 인자들 설정
     parser.add_argument('--my_seed', type = int, required = True)
-    parser.add_argument('--model', type = str, required = True)         # model : {'gpt2_small', 'gpt2_large', 'dialoGPT', 'bert'}
+    parser.add_argument('--model', type = str, required = True)         # model : {'gpt2_small', 'gpt2_large', 'dialoGPT', 'bert', 'opt', 'xglm', 'ctrl', 'gpt_j'}
     parser.add_argument('--task', type = str, required = True)          # task : {'ft', 'rl', 'train_eval', 'test_eval'} , ft = fine-tuning, rl = reinforcement-learning
     parser.add_argument('--dataset', type = str, required = True)       # dataset = {'sentiment-0', 'sentiment-1', 
                                                                                     # 'toxicity-0', 'toxicity-1', 
@@ -60,6 +60,10 @@ def get_params():
     parser.add_argument('--gen_len', type = int, required = False)              # gen_len : 임의의 정수
     parser.add_argument('--dropout', type = str, required = False)              # dropout : 드롭아웃 스타일 {'random', 'quantile'}
     parser.add_argument('--dropout_rate', type = float, required = False)       # dropout_rate : 드롭아웃 비율, 임의의 [0, 1]
+
+
+    parser.add_argument('--init_weight', type = str, required = False)          # init_weight : my_model = gpt2_small_init_weight 일 때만 사용.
+                                                                                # {'uniform', 'normal', 'Glorot', 'He', 'constant'} 중 하나 입력
 
     parser.add_argument('--test_prefix', type=str, required=False)              # test_prefix : evaluate_LLM 단계에서 초기 값으로 넣어주는 단어
     global args
@@ -108,6 +112,10 @@ def set_save_dir(kwargs: dict, folder=None, subfolder=None) -> str:
     createFolder(save_file_dir)
 
     return save_file_dir
+
+
+def name_save_file(kwargs: dict) -> str:
+    return ''.join([ '_' + str(val) if idx > 0 else str(val) for idx, val in enumerate(kwargs.values())])
 
 
 '''
@@ -654,4 +662,24 @@ def right_pad_after_eos_token(gen_inputs, eos_token_id:int, pad_token_id:int, to
 
     return gen_inputs_right_pad
 
-# %%
+
+def custom_generation(model, initial_data, decoding='greedy', max_gen_len=15):
+    gen_seqs = copy.deepcopy(initial_data)
+
+    for i in range(max_gen_len):
+        dec_outputs = model(gen_seqs)
+    
+       # 보통 dec_outputs은 여러 array를 원소로 갖는 list로 정의되는데, 
+       # 이 때 첫번째 원소가 대게 logits 값이므로 dec_outputs[0]으로 해주었음
+
+        if decoding == 'greedy':
+            top_k = 1
+            preds = tf.math.top_k(dec_outputs[0][:, -1, :], k = top_k)[1]          # get a token of maximal probability at each time step
+            # preds = tf.expand_dims(preds, axis = -1)                            # get a token of the last time step
+            gen_seqs = tf.concat([gen_seqs, tf.cast(preds, dtype=tf.int32)], axis=-1)
+
+        elif decoding == 'stochastic':
+            preds = tf.random.categorical(logits = dec_outputs[0][:, -1, :], num_samples = 1)
+            gen_seqs = tf.concat([gen_seqs, tf.cast(preds, dtype=tf.int32)], axis=-1)
+
+    return gen_seqs

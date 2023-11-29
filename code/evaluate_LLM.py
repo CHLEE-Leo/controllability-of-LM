@@ -15,7 +15,8 @@ import tqdm
 import glob
 import matplotlib.pyplot as plt
 
-from utils import get_params, set_save_dir, indice_pad_in_prefix, remove_pad_in_prefix_case, right_pad_after_eos_token, truncate_datasize_by_ratio, get_truncated_data, extract_first_sentence, extract_n_sentences, seed_everything, get_first_n_words
+# from utils import get_params, set_save_dir, indice_pad_in_prefix, remove_pad_in_prefix_case, right_pad_after_eos_token, truncate_datasize_by_ratio, get_truncated_data, extract_first_sentence, extract_n_sentences, seed_everything, get_first_n_words
+from utils import get_params, set_save_dir, extract_n_sentences, seed_everything, get_first_n_words
 
 '''
 파라미터 로드

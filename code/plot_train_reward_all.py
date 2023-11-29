@@ -16,9 +16,11 @@ parser.add_argument('--dataset', type = str, required = True)       # dataset = 
                                                                     #               'emotion-0', 'emotion-1', 'emotion-2', 'emotion-3', 'emotion-4', 'emotion-5', 'emotion-6',
                                                                     #               'topic-0', 'act-1', 'act-2', 'act-3'}
 parser.add_argument('--decoding', type = str, required = False)     # decoding : {'greedy', 'stochastic', 'top-k', 'top-p'}
+parser.add_argument('--history', type = str, required = False)      # history : {'reward', 'acc', 'loss'}
 args = parser.parse_args()
 my_dataset = args.dataset
 my_decoding = args.decoding
+my_history = args.history + '_history'
 # my_dataset = 'sentiment-0'
 # my_decoding = 'top-k'
 
@@ -38,31 +40,31 @@ for idx, each_dir in enumerate(REWARD_FILE_DIR_LIST):
         my_dropout = each_dir.split('_')[-2]
         my_dropout_rate = each_dir.split('_')[-1]
         
-        train_reward_pd_all = pd.read_csv(each_dir + '/reward_history.csv', index_col=0)
-        train_reward_pd_all['dropout'] = my_dropout
-        train_reward_pd_all['dropout_rate'] = my_dropout_rate
+        train_history_pd_all = pd.read_csv(each_dir + '/' + my_history + '.csv', index_col=0)
+        train_history_pd_all['dropout'] = my_dropout
+        train_history_pd_all['dropout_rate'] = my_dropout_rate
         print('dropout :', my_dropout)
         print('dropout_rate :', my_dropout_rate)
-        print('length : ', train_reward_pd_all.shape)
+        print('length : ', train_history_pd_all.shape)
 
     else:
         my_dropout = each_dir.split('_')[-2]
         my_dropout_rate = each_dir.split('_')[-1]
 
-        train_reward_pd = pd.read_csv(each_dir + '/reward_history.csv', index_col=0)
+        train_reward_pd = pd.read_csv(each_dir + '/' + my_history + '.csv', index_col=0)
         train_reward_pd['dropout'] = my_dropout
         train_reward_pd['dropout_rate'] = my_dropout_rate
         print('dropout :', my_dropout)
         print('dropout_rate :', my_dropout_rate)
         print('length : ', train_reward_pd.shape)
 
-        train_reward_pd_all = pd.concat([train_reward_pd_all, train_reward_pd], axis=0)
+        train_history_pd_all = pd.concat([train_history_pd_all, train_reward_pd], axis=0)
 
 '''
 플롯팅
 '''
-dropout_list = np.unique(train_reward_pd_all['dropout'])
-dropout_rate_list = np.unique(train_reward_pd_all['dropout_rate'])
+dropout_list = np.unique(train_history_pd_all['dropout'])
+dropout_rate_list = np.unique(train_history_pd_all['dropout_rate'])
 plt.figure(figsize = (3, 3))
 for i in dropout_list:
 
@@ -75,7 +77,7 @@ for i in dropout_list:
 
     if i == 'None':
         j = 0.0
-        first_filter = train_reward_pd_all[train_reward_pd_all['dropout'] == i]
+        first_filter = train_history_pd_all[train_history_pd_all['dropout'] == i]
         train_reward = first_filter['train_reward']
 
         plt.plot(train_reward, marker=target_marker, markersize=7.5, label='{}_{}'.format(i, j), alpha=0.5)
@@ -83,7 +85,7 @@ for i in dropout_list:
     else:
         for j in dropout_rate_list:
             if j != str(0.0):
-                first_filter = train_reward_pd_all[train_reward_pd_all['dropout'] == i]
+                first_filter = train_history_pd_all[train_history_pd_all['dropout'] == i]
                 second_filter = first_filter[first_filter['dropout_rate'] == j]
                 train_reward = second_filter['train_reward']
 
@@ -98,4 +100,4 @@ plt.legend(bbox_to_anchor = (1.7, 1.0), loc='upper right')
 plt.title('decoding: {}'.format(my_decoding))
 # plt.title('dataset : {} - decoding : {}'.format(my_dataset, my_decoding))
 # plt.show()
-plt.savefig(RESULT_DIR + '/{}/gpt2_small'.format(my_dataset) + '/plot_{}_{}.pdf'.format(my_dataset, my_decoding), bbox_inches='tight')
+plt.savefig(RESULT_DIR + '/{}/gpt2_small'.format(my_dataset) + '/plot_{}_{}_{}.pdf'.format(my_dataset, my_decoding, my_history), bbox_inches='tight')

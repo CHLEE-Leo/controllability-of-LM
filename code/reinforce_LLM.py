@@ -13,10 +13,10 @@ import time
 import tqdm
 import glob
 
-from utils import get_params, set_save_dir, truncate_datasize_by_ratio, get_truncated_data, indice_pad_in_prefix, remove_pad_in_prefix_case, right_pad_after_eos_token
+from utils import get_params, set_save_dir, truncate_datasize_by_ratio, get_truncated_data, indice_pad_in_prefix, remove_pad_in_prefix_case, right_pad_after_eos_token, custom_generation
 from tensorflow.keras.utils import Progbar
 from load_pretrained_LLM import bert_tokenizer, bert_model, gpt_tokenizer, gpt_model, target_model
-from train_function_RL import reward_function, reward_dropout, control_step
+from train_function_RL import reward_function, reward_dropout, control_step, control_step_trans_xl
 
 '''
 파라미터 로드
@@ -33,18 +33,39 @@ my_prefix_len = args.prefix_len    # length of prefix to use
 my_gen_len = args.gen_len          # length of generation
 my_dropout = args.dropout
 my_dropout_rate = args.dropout_rate
+my_init_weight = args.init_weight
 
 parent_dir = str(Path(os.getcwd()).parents[0])
-PARAM_DIR = parent_dir + '/params' + '/' + str(my_dataset) + '/' + str(my_model)
-PARAM_DIR = glob.glob(PARAM_DIR + '/*{}**{}**{}**{}**{}**{}**{}**{}**{}*'.format(my_task, my_rl_lr, my_rl_bs, my_rl_epoch, my_decoding, my_prefix_len, my_gen_len, my_dropout, my_dropout_rate))[0]
-with open(PARAM_DIR + '/kwargs.json', 'r') as f:
-    kwargs = json.load(f)
+
+# my_init_weight == None <==> my_model != gpt2_small_init_weight
+#                        <==> my_model == {gpt2_small, gpt2_large, opt, xglm, ..., etc}
+if my_init_weight == None:
+    PARAM_DIR = parent_dir + '/params' + '/' + str(my_dataset) + '/' + str(my_model)
+    PARAM_DIR = glob.glob(PARAM_DIR + '/*{}**{}**{}**{}**{}**{}**{}**{}**{}'.format(my_task, my_rl_lr, my_rl_bs, my_rl_epoch, my_decoding, my_prefix_len, my_gen_len, my_dropout, my_dropout_rate))[0]
+    with open(PARAM_DIR + '/kwargs.json', 'r') as f:
+        kwargs = json.load(f)
+
+# my_init_weight != None <==> my_model == gpt2_small_init_weight
+else:
+    PARAM_DIR = parent_dir + '/params' + '/' + str(my_dataset) + '/' + str(my_model + '=' + my_init_weight)
+    PARAM_DIR = glob.glob(PARAM_DIR + '/*{}**{}**{}**{}**{}**{}**{}**{}**{}'.format(my_task, my_rl_lr, my_rl_bs, my_rl_epoch, my_decoding, my_prefix_len, my_gen_len, my_dropout, my_dropout_rate))[0]
+    with open(PARAM_DIR + '/kwargs.json', 'r') as f:
+        kwargs = json.load(f)
 
 '''
 데이터 로드
 '''
 # 데이터 로드 경로 설정
-prep_data_path = parent_dir + '/prep_data' + '/' + my_dataset.split('-')[0] + '/' + my_model
+if my_init_weight == None:
+    prep_data_path = parent_dir + '/prep_data' + '/' + my_dataset.split('-')[0] + '/' + my_model
+else:
+    # gpt2_small_init_weight 대신 gpt2_small를 data_path로 정의함.
+    ### 같은 데이터셋으로부터 각 문장의 prefix만 추출해서 쓰면 되기 때문에 data_path는 동일해야 함.
+    ### 다른 모델들 (e.g., opt, xglm, etc.)과 달리 gpt2_small_init_weight는 접두어가 같은 gpt2_small가 data_path를 공유하면 됨.
+    ### 따라서 "_init_weight" 을 ""로 replace 함
+    # <==> gpt2_small_init_weight -> gpt2_small
+    prep_data_path = parent_dir + '/prep_data' + '/' + my_dataset.split('-')[0] + '/' + my_model.replace('_init_weight', '')
+
 
 '''
 훈련용 데이터 셋팅
@@ -135,8 +156,19 @@ with tf.device("/cpu:0"):
 훈련 과정 수행
 '''
 # 학습 가중치 및 결과 저장경로 생성
-SAVE_WEIGHT_DIR = set_save_dir(kwargs, folder='weights', subfolder=my_dataset + '/' + my_model)
-SAVE_RESULT_DIR = set_save_dir(kwargs, folder='results', subfolder=my_dataset + '/' + my_model)
+# my_init_weight == None <==> my_model != gpt2_small_init_weight
+#                        <==> my_model == {gpt2_small, gpt2_large, opt, xglm, ..., etc}
+if my_init_weight == None:
+    SAVE_WEIGHT_DIR = set_save_dir(kwargs, folder='weights', subfolder=my_dataset + '/' + my_model)
+    SAVE_RESULT_DIR = set_save_dir(kwargs, folder='results', subfolder=my_dataset + '/' + my_model)
+
+# my_init_weight != None <==> my_model == gpt2_small_init_weight
+else:
+    SAVE_WEIGHT_DIR = set_save_dir(kwargs, folder='weights', subfolder=my_dataset + '/' + my_model + '=' + my_init_weight)
+    SAVE_RESULT_DIR = set_save_dir(kwargs, folder='results', subfolder=my_dataset + '/' + my_model + '=' + my_init_weight)
+
+print('SAVE_WEIGHT_DIR :', SAVE_WEIGHT_DIR)
+print('SAVE_RESULT_DIR :', SAVE_RESULT_DIR)
 
 # 훈련 메트릭
 metrics_names = [str(my_model) + '_loss', str(my_model) + '_acc', str(my_model) + '_reward']
@@ -146,6 +178,7 @@ train_loss_history = []
 train_acc_history = []
 train_reward_history = []
 target_label = int(my_dataset.split('-')[-1])
+
 
 # 훈련 루프
 total_start_time = time.time()
@@ -176,12 +209,38 @@ for epoch in range(my_rl_epoch):
                                                 repetition_penalty=1.2, 
                                                 do_sample=False)
         elif my_decoding == 'stochastic':
-            bp_gen_texts = gpt_model.generate(train_input_x_prefixed, attention_mask = train_input_att_prefixed, 
-                                                max_new_tokens=my_gen_len, 
-                                                pad_token_id=gpt_tokenizer.pad_token_id,
-                                                eos_token_id=gpt_tokenizer.eos_token_id,
-                                                repetition_penalty=1.2, 
-                                                do_sample=True, temperature=1.0)
+            if my_model == 'gpt2_small' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm':
+                bp_gen_texts = gpt_model.generate(train_input_x_prefixed, attention_mask = train_input_att_prefixed, 
+                                                    max_new_tokens=my_gen_len, 
+                                                    pad_token_id=gpt_tokenizer.pad_token_id,
+                                                    eos_token_id=gpt_tokenizer.eos_token_id,
+                                                    repetition_penalty=1.2, 
+                                                    do_sample=True, temperature=1.0)
+                # print('bp_gen_texts : {}'.format(gpt_tokenizer.batch_decode(bp_gen_texts[:1, 1:])))
+
+            if my_model == 'gpt2_small_init_weight' :
+                bp_gen_texts = gpt_model.generate(train_input_x_prefixed, attention_mask = train_input_att_prefixed, 
+                                                    max_new_tokens=my_gen_len, 
+                                                    pad_token_id=gpt_tokenizer.pad_token_id,
+                                                    eos_token_id=gpt_tokenizer.eos_token_id,
+                                                    repetition_penalty=3.0,
+                                                    do_sample=True, temperature=0.4)
+                # print('bp_gen_texts : {}'.format(gpt_tokenizer.batch_decode(bp_gen_texts[:1, 1:])))
+
+            # ctrl의 경우 repetition_penalty와 temperature에 민감해서 따로 설정
+            # repetition_penalty=4.0
+            # temparature=0.3
+            elif my_model == 'ctrl':
+                bp_gen_texts = gpt_model.generate(train_input_x_prefixed, attention_mask = train_input_att_prefixed, 
+                                                    max_new_tokens=my_gen_len, 
+                                                    pad_token_id=gpt_tokenizer.pad_token_id,
+                                                    eos_token_id=gpt_tokenizer.eos_token_id,
+                                                    repetition_penalty=4.0, 
+                                                    do_sample=True, temperature=0.3)
+
+            elif my_model == 'trans_xl':
+                bp_gen_texts = custom_generation(model=gpt_model, initial_data=train_input_x_prefixed, decoding='stochastic', max_gen_len=my_gen_len)
+
         elif my_decoding == 'top-k':
             bp_gen_texts = gpt_model.generate(train_input_x_prefixed, attention_mask = train_input_att_prefixed, 
                                                 max_new_tokens=my_gen_len, 
@@ -204,13 +263,38 @@ for epoch in range(my_rl_epoch):
                                                 num_beams=3, repetition_penalty=1.2, early_stopping=True)
 
         # 생성된 시퀀스의 보상 계산
-        bp_padded_gen_texts = right_pad_after_eos_token(
-                                    bp_gen_texts, 
-                                    eos_token_id=gpt_tokenizer.eos_token_id, 
-                                    pad_token_id=gpt_tokenizer.pad_token_id,
-                                    total_len=my_gen_len
-                                    )
-        
+        if my_model == 'gpt2_small' or my_model == 'gpt2_small_init_weight' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            bp_padded_gen_texts = right_pad_after_eos_token(
+                                        bp_gen_texts, 
+                                        eos_token_id=gpt_tokenizer.eos_token_id, 
+                                        pad_token_id=gpt_tokenizer.pad_token_id,
+                                        total_len = my_gen_len + my_prefix_len
+                                        )
+
+            # 생성된 시퀀스로 target_policy_model을 훈련시킬 input, output, target (= right-shifted output) 데이터 만들기
+            rl_input_seq = bp_padded_gen_texts[:, :-1]            # bp_padded_gen_texts[:, :-1] : bp_gen_texts[:, input_len:-1] 가 right_pad 된 상태
+            rl_target_seq = bp_padded_gen_texts[:, 1:]            # bp_padded_gen_texts[:, 1:] : bp_gen_texts[:, input_len+1:] 가 right_pad 된 상태
+
+            # attention mask 데이터 만들기
+            rl_input_mask = tf.math.not_equal(rl_input_seq, gpt_tokenizer.pad_token_id)
+            rl_target_mask = tf.math.not_equal(rl_target_seq, gpt_tokenizer.pad_token_id)
+
+        elif my_model == 'trans_xl':
+            bp_padded_gen_texts = right_pad_after_eos_token(
+                                        bp_gen_texts, 
+                                        eos_token_id=gpt_tokenizer.eos_token_id, 
+                                        pad_token_id=gpt_tokenizer.eos_token_id,
+                                        total_len = my_gen_len + my_prefix_len
+                                        )
+
+            # 생성된 시퀀스로 target_policy_model을 훈련시킬 input, output, target (= right-shifted output) 데이터 만들기
+            rl_input_seq = bp_padded_gen_texts[:, :-1]            # bp_padded_gen_texts[:, :-1] : bp_gen_texts[:, input_len:-1] 가 right_pad 된 상태
+            rl_target_seq = bp_padded_gen_texts[:, 1:]            # bp_padded_gen_texts[:, 1:] : bp_gen_texts[:, input_len+1:] 가 right_pad 된 상태
+
+            # attention mask 데이터 만들기
+            rl_input_mask = tf.math.not_equal(rl_input_seq, gpt_tokenizer.eos_token_id)
+            rl_target_mask = tf.math.not_equal(rl_target_seq, gpt_tokenizer.eos_token_id)
+
         bp_gen_texts_decoded = gpt_tokenizer.batch_decode(bp_padded_gen_texts)   # 보상 계산은 생성이 시작된 <bos> 이후부터 계산해야 하므로 "+1" 적용
         bp_gen_texts_bert_encoded = bert_tokenizer(bp_gen_texts_decoded, return_tensors='np', truncation=True, max_length=my_gen_len, padding=True)     # <bos> 포함
         bert_bp_gen_texts = bp_gen_texts_bert_encoded['input_ids']
@@ -224,16 +308,13 @@ for epoch in range(my_rl_epoch):
         else:
             bp_rewards = reward_function(bp_pred_logits, target_label)
     
-        # 생성된 시퀀스로 target_policy_model을 훈련시킬 input, output, target (= right-shifted output) 데이터 만들기
-        rl_input_seq = bp_padded_gen_texts[:, :-1]            # bp_padded_gen_texts[:, :-1] : bp_gen_texts[:, input_len:-1] 가 right_pad 된 상태
-        rl_target_seq = bp_padded_gen_texts[:, 1:]            # bp_padded_gen_texts[:, 1:] : bp_gen_texts[:, input_len+1:] 가 right_pad 된 상태
-
-        # attention mask 데이터 만들기
-        rl_input_mask = tf.math.not_equal(rl_input_seq, gpt_tokenizer.pad_token_id)
-        rl_target_mask = tf.math.not_equal(rl_target_seq, gpt_tokenizer.pad_token_id)
 
         # 강화학습
-        train_loss, train_acc = control_step((rl_input_seq, rl_input_mask, rl_target_seq, rl_target_mask, bp_rewards), target_model)
+        if my_model == 'gpt2_small' or my_model == 'gpt2_small_init_weight' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            train_loss, train_acc = control_step((rl_input_seq, rl_input_mask, rl_target_seq, rl_target_mask, bp_rewards), target_model)
+        elif my_model == 'trans_xl':
+            train_loss, train_acc = control_step_trans_xl((rl_input_seq, rl_input_mask, rl_target_seq, rl_target_mask, bp_rewards), target_model)
+        # train_loss = train_acc = tf.cast(0, dtype=tf.float32)
 
 
         '''
@@ -242,17 +323,33 @@ for epoch in range(my_rl_epoch):
         - 이는 reward의 확실한 상승 추세를 보기 위함임.
         - eval() 단계에서 생성을 할 때는 stochastic decoding으로 생성해도 됨.
         '''
-        tp_gen_texts = target_model.generate(train_input_x_prefixed,
-                                                attention_mask = train_input_att_prefixed,
-                                                max_new_tokens=my_gen_len,
-                                                pad_token_id=gpt_tokenizer.pad_token_id,
-                                                eos_token_id=gpt_tokenizer.eos_token_id,
-                                                do_sample=False)
+        if my_model == 'gpt2_small' or my_model == 'gpt2_small_init_weight' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm':
+            tp_gen_texts = target_model.generate(train_input_x_prefixed,
+                                                    attention_mask = train_input_att_prefixed,
+                                                    max_new_tokens=my_gen_len,
+                                                    pad_token_id=gpt_tokenizer.pad_token_id,
+                                                    eos_token_id=gpt_tokenizer.eos_token_id,
+                                                    do_sample=False)
+            # print('tp_gen_texts : {}'.format(gpt_tokenizer.batch_decode(tp_gen_texts[:1, 1:])))
+
+        # ctrl의 경우 do_sample=False, 즉 greedy decoding에 이상하게 작동하는 관계로 행동정책과 동일하게 do_sample=True로 inference 수행.
+        elif my_model == 'ctrl':
+            tp_gen_texts = target_model.generate(train_input_x_prefixed,
+                                        attention_mask = train_input_att_prefixed,
+                                        max_new_tokens=my_gen_len,
+                                        pad_token_id=gpt_tokenizer.pad_token_id,
+                                        eos_token_id=gpt_tokenizer.eos_token_id,
+                                        repetition_penalty=4.0, 
+                                        do_sample=True, temperature=0.3)
+
+        elif my_model == 'trans_xl':
+            tp_gen_texts = custom_generation(model=target_model, initial_data=train_input_x_prefixed, decoding='greedy', max_gen_len=my_gen_len)
+
         padded_tp_gen_texts = right_pad_after_eos_token(
                                     tp_gen_texts, 
                                     eos_token_id=gpt_tokenizer.eos_token_id, 
                                     pad_token_id=gpt_tokenizer.pad_token_id,
-                                    total_len=my_gen_len
+                                    total_len = my_gen_len + my_prefix_len
                                     )
         tp_gen_texts_decoded = gpt_tokenizer.batch_decode(padded_tp_gen_texts)   # 보상 계산은 생성이 시작된 <bos> 이후부터 계산해야 하므로 "+1" 적용
         tp_gen_texts_bert_encoded = bert_tokenizer(tp_gen_texts_decoded, return_tensors='np', truncation=True, max_length=my_gen_len, padding=True)     # <bos> 포함

@@ -9,7 +9,7 @@ if __name__ == "__main__":
     '''
     # GPU setting
     os.environ["TF_GPU_ALLOCATOR"] = "cuda_malloc_async"
-    # os.environ["CUDA_VISIBLE_DEVICES"] = '5'
+    # os.environ["CUDA_VISIBLE_DEVICES"] = '3'
     initialize_setting()
 
     '''
@@ -90,6 +90,7 @@ if __name__ == "__main__":
         my_gen_len = args.gen_len
         my_dropout = args.dropout
         my_dropout_rate = args.dropout_rate
+        my_init_weight = args.init_weight
 
         '''
         파라미터 정의
@@ -111,15 +112,24 @@ if __name__ == "__main__":
         '''
         파라미터 저장 경로 설정 및 저장
         '''
-        SAVE_PARAM_DIR = set_save_dir(kwargs, folder='params', subfolder=my_dataset + '/' + my_model)
-        with open(SAVE_PARAM_DIR + '/kwargs.json', 'w') as f:
-            json.dump(kwargs, f)
+        # my_init_weight == None <==> my_model != gpt2_small_init_weight
+        #                        <==> my_model == {gpt2_small, gpt2_large, opt, xglm, ..., etc}
+        if my_init_weight == None:
+            SAVE_PARAM_DIR = set_save_dir(kwargs, folder='params', subfolder=my_dataset + '/' + my_model)
+            with open(SAVE_PARAM_DIR + '/kwargs.json', 'w') as f:
+                json.dump(kwargs, f)
+
+        # my_init_weight != None <==> my_model == gpt2_small_init_weight
+        else:
+            SAVE_PARAM_DIR = set_save_dir(kwargs, folder='params', subfolder=my_dataset + '/' + my_model + '=' + my_init_weight)
+            with open(SAVE_PARAM_DIR + '/kwargs.json', 'w') as f:
+                json.dump(kwargs, f)            
 
         '''
         파일 실행
         '''
         import reinforce_LLM
-
+        # import reinforce_LLM_copy
 
     elif args.task == 'train_eval' or args.task == 'test_eval':
 

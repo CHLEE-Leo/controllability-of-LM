@@ -388,7 +388,9 @@ elif 'politeness' in my_dataset:
         
         train_input_x_dict = left_tokenizer(list(train_input_x), return_tensors='np', truncation=True, max_length=my_max_len, padding=True)         # 인풋 시퀀스 토크나이징
         train_input_x_np = train_input_x_dict['input_ids']
-        train_input_x_att_mask_np = train_input_x_dict['attention_mask']
+        
+        if my_model == 'gpt2_small' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            train_input_x_att_mask_np = train_input_x_dict['attention_mask']
 
         # train 데이터의 y 시퀀스 로드 및 정제
         train_y = train_data['txt']
@@ -396,7 +398,9 @@ elif 'politeness' in my_dataset:
         # train_y = train_y.iloc[target_idx]
         train_y_dict = right_tokenizer(list(train_y), return_tensors='np', truncation=True, max_length=my_max_len, padding=True)         # 인풋 시퀀스 토크나이징
         train_y_np = train_y_dict['input_ids']
-        train_y_att_mask_np = train_y_dict['attention_mask']
+
+        if my_model == 'gpt2_small' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            train_y_att_mask_np = train_y_dict['attention_mask']
 
 
         '''
@@ -408,7 +412,9 @@ elif 'politeness' in my_dataset:
         # test_input_x, trunc_len, target_idx = truncate_data(test_input_x, quantile=my_quantile)
         test_input_x_dict = left_tokenizer(list(test_input_x), return_tensors='np', truncation=True, max_length=my_max_len, padding=True)         # 인풋 시퀀스 토크나이징
         test_input_x_np = test_input_x_dict['input_ids']
-        test_input_x_att_mask_np = test_input_x_dict['attention_mask']
+        
+        if my_model == 'gpt2_small' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            test_input_x_att_mask_np = test_input_x_dict['attention_mask']
 
         # test 데이터의 y 시퀀스 로드 및 정제
         test_y = test_data['txt']
@@ -416,7 +422,9 @@ elif 'politeness' in my_dataset:
         # test_y = test_y.iloc[target_idx]
         test_y_dict = right_tokenizer(list(test_y), return_tensors='np', truncation=True, max_length=my_max_len, padding=True)         # 인풋 시퀀스 토크나이징
         test_y_np = test_y_dict['input_ids']
-        test_y_att_mask_np = test_y_dict['attention_mask']
+
+        if my_model == 'gpt2_small' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            test_y_att_mask_np = test_y_dict['attention_mask']
 
 
         '''
@@ -432,11 +440,12 @@ elif 'politeness' in my_dataset:
         np.save(train_np_file_path, train_input_x_np)
         np.save(test_np_file_path, test_input_x_np)
 
-        # train/test input_x 어텐션 데이터 .np 파일로 저장
-        train_np_file_path = save_dir + '/train_input_att.npy'
-        test_np_file_path = save_dir + '/test_input_att.npy'
-        np.save(train_np_file_path, train_input_x_att_mask_np)
-        np.save(test_np_file_path, test_input_x_att_mask_np)
+        if my_model == 'gpt2_small' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            # train/test input_x 어텐션 데이터 .np 파일로 저장
+            train_np_file_path = save_dir + '/train_input_att.npy'
+            test_np_file_path = save_dir + '/test_input_att.npy'
+            np.save(train_np_file_path, train_input_x_att_mask_np)
+            np.save(test_np_file_path, test_input_x_att_mask_np)
 
         # train/test target_y 시퀀스 데이터 .np 파일로 저장
         train_np_file_path = save_dir + '/train_y.npy'
@@ -444,11 +453,12 @@ elif 'politeness' in my_dataset:
         np.save(train_np_file_path, train_y_np)
         np.save(test_np_file_path, test_y_np)
 
-        # train/test target_y 어텐션 데이터 .np 파일로 저장
-        train_np_file_path = save_dir + '/train_y_att.npy'
-        test_np_file_path = save_dir + '/test_y_att.npy'
-        np.save(train_np_file_path, train_y_att_mask_np)
-        np.save(test_np_file_path, test_y_att_mask_np)
+        if my_model == 'gpt2_small' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            # train/test target_y 어텐션 데이터 .np 파일로 저장
+            train_np_file_path = save_dir + '/train_y_att.npy'
+            test_np_file_path = save_dir + '/test_y_att.npy'
+            np.save(train_np_file_path, train_y_att_mask_np)
+            np.save(test_np_file_path, test_y_att_mask_np)
 
 
 if 'topic' in my_dataset:
@@ -539,7 +549,9 @@ if 'topic' in my_dataset:
         
         train_input_x_dict = left_tokenizer(list(train_input_x), return_tensors='np', truncation=True, max_length=my_max_len, padding=True)         # 인풋 시퀀스 토크나이징
         train_input_x_np = train_input_x_dict['input_ids']
-        train_input_x_att_mask_np = train_input_x_dict['attention_mask']
+
+        if my_model == 'gpt2_small' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            train_input_x_att_mask_np = train_input_x_dict['attention_mask']
 
         # train 데이터의 y 시퀀스 로드 및 정제
         train_y = train_data['text']
@@ -547,7 +559,9 @@ if 'topic' in my_dataset:
         # train_y = train_y.iloc[target_idx]
         train_y_dict = right_tokenizer(list(train_y), return_tensors='np', truncation=True, max_length=my_max_len, padding=True)         # 인풋 시퀀스 토크나이징
         train_y_np = train_y_dict['input_ids']
-        train_y_att_mask_np = train_y_dict['attention_mask']
+
+        if my_model == 'gpt2_small' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            train_y_att_mask_np = train_y_dict['attention_mask']
 
 
         '''
@@ -559,7 +573,9 @@ if 'topic' in my_dataset:
         # test_input_x, trunc_len, target_idx = truncate_data(test_input_x, quantile=my_quantile)
         test_input_x_dict = left_tokenizer(list(test_input_x), return_tensors='np', truncation=True, max_length=my_max_len, padding=True)         # 인풋 시퀀스 토크나이징
         test_input_x_np = test_input_x_dict['input_ids']
-        test_input_x_att_mask_np = test_input_x_dict['attention_mask']
+    
+        if my_model == 'gpt2_small' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            test_input_x_att_mask_np = test_input_x_dict['attention_mask']
 
         # test 데이터의 y 시퀀스 로드 및 정제
         test_y = test_data['text']
@@ -567,7 +583,9 @@ if 'topic' in my_dataset:
         # test_y = test_y.iloc[target_idx]
         test_y_dict = right_tokenizer(list(test_y), return_tensors='np', truncation=True, max_length=my_max_len, padding=True)         # 인풋 시퀀스 토크나이징
         test_y_np = test_y_dict['input_ids']
-        test_y_att_mask_np = test_y_dict['attention_mask']
+    
+        if my_model == 'gpt2_small' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            test_y_att_mask_np = test_y_dict['attention_mask']
 
 
         '''
@@ -583,11 +601,12 @@ if 'topic' in my_dataset:
         np.save(train_np_file_path, train_input_x_np)
         np.save(test_np_file_path, test_input_x_np)
 
-        # train/test input_x 어텐션 데이터 .np 파일로 저장
-        train_np_file_path = save_dir + '/train_input_att.npy'
-        test_np_file_path = save_dir + '/test_input_att.npy'
-        np.save(train_np_file_path, train_input_x_att_mask_np)
-        np.save(test_np_file_path, test_input_x_att_mask_np)
+        if my_model == 'gpt2_small' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            # train/test input_x 어텐션 데이터 .np 파일로 저장
+            train_np_file_path = save_dir + '/train_input_att.npy'
+            test_np_file_path = save_dir + '/test_input_att.npy'
+            np.save(train_np_file_path, train_input_x_att_mask_np)
+            np.save(test_np_file_path, test_input_x_att_mask_np)
 
         # train/test target_y 시퀀스 데이터 .np 파일로 저장
         train_np_file_path = save_dir + '/train_y.npy'
@@ -595,11 +614,12 @@ if 'topic' in my_dataset:
         np.save(train_np_file_path, train_y_np)
         np.save(test_np_file_path, test_y_np)
 
-        # train/test target_y 어텐션 데이터 .np 파일로 저장
-        train_np_file_path = save_dir + '/train_y_att.npy'
-        test_np_file_path = save_dir + '/test_y_att.npy'
-        np.save(train_np_file_path, train_y_att_mask_np)
-        np.save(test_np_file_path, test_y_att_mask_np)
+        if my_model == 'gpt2_small' or my_model == 'gpt2_large' or my_model == 'gpt_j' or my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+            # train/test target_y 어텐션 데이터 .np 파일로 저장
+            train_np_file_path = save_dir + '/train_y_att.npy'
+            test_np_file_path = save_dir + '/test_y_att.npy'
+            np.save(train_np_file_path, train_y_att_mask_np)
+            np.save(test_np_file_path, test_y_att_mask_np)
 
 elif 'toxicity' in my_dataset:
     '''

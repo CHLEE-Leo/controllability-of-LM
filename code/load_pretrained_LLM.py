@@ -8,7 +8,7 @@ import pandas as pd
 import tensorflow as tf
 from utils import get_params
 
-from transformers import AutoTokenizer, TFAutoModelForCausalLM, TFBertModel
+from transformers import AutoTokenizer, TFAutoModelForCausalLM, TFBertModel, TFTransfoXLLMHeadModel, TFGPTJForCausalLM
 import glob
 
 # from pretrained_model import BERT_Classifier
@@ -180,46 +180,177 @@ elif my_task == 'rl':
 
     '''
     task == 'ft'를 통해 파인튜닝 된 GPT2와 BERT를 모두 불러오기
-    - GPT2는 model == '' 인자 설정에 따라 다른 모델이 로드됨 (e.g., gpt2-small, gpt2-large).
+    - GPT2는 model == '' 인자 설정에 따라 다른 모델이 로드됨 (e.g., gpt2-small, gpt2-large, trans_xl).
     - BERT는 dataset =='' 인자 설정에 따라 다른 모델이 로드됨 (e.g., sentiment, toxicity, politeness).
     '''
 
-    # 1) GPT2의 토크나이저 로드 및 모델 초기화 & 미세조정 가중치 로드
-    '''
-    행동 정책 모델 (behavior policy model)
-    '''
-    # 토크나이저 로드 및 모델 초기화
-    pretraind_config_dir = parent_dir + '/pretrained_weights' + '/' + my_model
-    # pretraind_config_dir = parent_dir + '/pretrained_weights/gpt2_small'
-    pretrained_tokenizer_dir = pretraind_config_dir + '/tokenizer_left'
-    pretrained_weights_dir = pretraind_config_dir + '/model'
-    gpt_tokenizer = AutoTokenizer.from_pretrained(pretrained_tokenizer_dir)
-    gpt_model = TFAutoModelForCausalLM.from_pretrained(pretrained_weights_dir)
-    # gpt_model.resize_token_embeddings(len(gpt_tokenizer))
+    if my_model == 'gpt2_small' or my_model == 'gpt2_large':
+        # 1) GPT2의 토크나이저 로드 및 모델 초기화 & 미세조정 가중치 로드
+        '''
+        행동 정책 모델 (behavior policy model)
+        - 행동정책에는 .resize_token_embeddings()를 안하는게 확실히 맞음 !
+        '''
+        # 토크나이저 로드 및 모델 초기화
+        pretraind_config_dir = parent_dir + '/pretrained_weights' + '/' + my_model
+        # pretraind_config_dir = parent_dir + '/pretrained_weights/gpt2_small'
+        pretrained_tokenizer_dir = pretraind_config_dir + '/tokenizer_left'
+        pretrained_weights_dir = pretraind_config_dir + '/model'
+        gpt_tokenizer = AutoTokenizer.from_pretrained(pretrained_tokenizer_dir)
+        gpt_model = TFAutoModelForCausalLM.from_pretrained(pretrained_weights_dir)
+        # gpt_model.resize_token_embeddings(len(gpt_tokenizer))
 
-    # # 파인튜닝 가중치 로드
-    # finetuned_weights_dir = parent_dir + '/weights' + '/' + my_dataset + '/' + my_model
-    # my_model_ft_weights_dir = glob.glob(finetuned_weights_dir + '/*{}**{}**{}**{}*'.format('ft', my_lr, my_bs, my_epoch))[0]
-    # gpt_model.resize_token_embeddings(len(gpt_tokenizer))
-    # gpt_model.load_weights(tf.train.latest_checkpoint(my_model_ft_weights_dir))
 
-    '''
-    타겟 정책 모델 (target policy model)
-    '''
-    # 토크나이저 로드 및 모델 초기화
-    pretraind_config_dir = parent_dir + '/pretrained_weights' + '/' + my_model
-    # pretraind_config_dir = parent_dir + '/pretrained_weights/gpt2_small'
-    pretrained_tokenizer_dir = pretraind_config_dir + '/tokenizer_left'
-    pretrained_weights_dir = pretraind_config_dir + '/model'
-    gpt_tokenizer = AutoTokenizer.from_pretrained(pretrained_tokenizer_dir)
-    target_model = TFAutoModelForCausalLM.from_pretrained(pretrained_weights_dir)
-    # target_model.resize_token_embeddings(len(gpt_tokenizer))
+        '''
+        타겟 정책 모델 (target policy model)
+        - 타겟정책에는 .resize_token_embeddings()를 하는데 맞음 !
+        '''
+        # 토크나이저 로드 및 모델 초기화
+        pretraind_config_dir = parent_dir + '/pretrained_weights' + '/' + my_model
+        # pretraind_config_dir = parent_dir + '/pretrained_weights/gpt2_small'
+        pretrained_tokenizer_dir = pretraind_config_dir + '/tokenizer_left'
+        pretrained_weights_dir = pretraind_config_dir + '/model'
+        gpt_tokenizer = AutoTokenizer.from_pretrained(pretrained_tokenizer_dir)
+        target_model = TFAutoModelForCausalLM.from_pretrained(pretrained_weights_dir)
+        # target_model.resize_token_embeddings(len(gpt_tokenizer))
 
-    # # 파인튜닝 가중치 로드
-    # finetuned_weights_dir = parent_dir + '/weights' + '/' + my_dataset + '/' + my_model
-    # my_model_ft_weights_dir = glob.glob(finetuned_weights_dir + '/*{}**{}**{}**{}*'.format('ft', my_lr, my_bs, my_epoch))[0]
-    # target_model.resize_token_embeddings(len(gpt_tokenizer))
-    # target_model.load_weights(tf.train.latest_checkpoint(my_model_ft_weights_dir))
+
+    elif my_model == 'gpt2_small_init_weight':
+        my_init_weight = args.init_weight   # my_model == gpt2_small_init_weight 에서만 사용.
+
+        '''
+        행동 정책 모델 (behavior policy model)
+        - 행동정책에는 .resize_token_embeddings()를 안하는게 확실히 맞음 !
+        - 실험적으로 확인하였음. .resize_token_embeddings() 하면 gpt_model.generate()에서 이상하게 생성됨.
+        '''
+        # 토크나이저 로드 및 모델 초기화
+        pretraind_config_dir = parent_dir + '/pretrained_weights' + '/' + my_model.replace('_init_weight', '')
+        # pretraind_config_dir = parent_dir + '/pretrained_weights/gpt2_small'
+        pretrained_tokenizer_dir = pretraind_config_dir + '/tokenizer_left'
+        pretrained_weights_dir = pretraind_config_dir + '/model'
+        gpt_tokenizer = AutoTokenizer.from_pretrained(pretrained_tokenizer_dir)
+        gpt_model = TFAutoModelForCausalLM.from_pretrained(pretrained_weights_dir)
+        # gpt_model.resize_token_embeddings(len(gpt_tokenizer))
+
+        '''
+        타겟 정책 모델 (target policy model)
+        - 타겟정책에는 .resize_token_embeddings()를 하는데 맞음 !
+        '''
+        # 토크나이저 로드 및 모델 초기화
+        pretraind_config_dir = parent_dir + '/pretrained_weights' + '/' + my_model.replace('_init_weight', '')
+        # pretraind_config_dir = parent_dir + '/pretrained_weights/gpt2_small'
+        pretrained_tokenizer_dir = pretraind_config_dir + '/tokenizer_left'
+        pretrained_weights_dir = pretraind_config_dir + '/model'
+        gpt_tokenizer = AutoTokenizer.from_pretrained(pretrained_tokenizer_dir)
+        target_model = TFAutoModelForCausalLM.from_pretrained(pretrained_weights_dir)
+        target_model.resize_token_embeddings(len(gpt_tokenizer))
+
+
+        # 타겟 정책 (tp) 모델의 훈련 가능한 가중치를 초기화
+        # - 이렇게 해야 gpt2_small이 not_pretrained_tp가 됨.
+        # for my_init_weight in ['uniform', 'normal', 'Glorot', 'He']:
+        for weight in target_model.trainable_weights:
+            if hasattr(weight, 'shape'):
+
+                if my_init_weight == 'uniform':
+                    weight.assign(tf.random.uniform(weight.shape, minval=-0.05, maxval=0.05))
+
+                elif my_init_weight == 'normal':
+                    weight.assign(tf.random.normal(weight.shape, mean=0.0, stddev=0.05))
+
+                elif my_init_weight == 'Glorot':
+                    initializer = tf.initializers.GlorotNormal()
+                    weight.assign(initializer(weight.shape))
+
+                elif my_init_weight == 'He':
+                    initializer = tf.initializers.HeNormal()
+                    weight.assign(initializer(weight.shape))
+
+                elif my_init_weight == 'constant':
+                    weight.assign(tf.constant(0.01, shape=weight.shape))
+
+
+    elif my_model == 'opt' or my_model == 'xglm' or my_model == 'ctrl':
+        '''
+        행동 정책 모델 (behavior policy model)
+        - 행동정책에는 .resize_token_embeddings()를 안하는게 확실히 맞음 !
+        '''
+        # 토크나이저 로드 및 모델 초기화
+        pretraind_config_dir = parent_dir + '/pretrained_weights' + '/' + my_model
+        # pretraind_config_dir = parent_dir + '/pretrained_weights/gpt2_small'
+        pretrained_tokenizer_dir = pretraind_config_dir + '/tokenizer_left'
+        pretrained_weights_dir = pretraind_config_dir + '/model'
+        gpt_tokenizer = AutoTokenizer.from_pretrained(pretrained_tokenizer_dir)
+        gpt_model = TFAutoModelForCausalLM.from_pretrained(pretrained_weights_dir)
+        # gpt_model.resize_token_embeddings(len(gpt_tokenizer))
+
+
+        '''
+        타겟 정책 모델 (target policy model)
+        - 타겟정책에는 .resize_token_embeddings()를 하는데 맞음 !
+        '''
+        # 토크나이저 로드 및 모델 초기화
+        pretraind_config_dir = parent_dir + '/pretrained_weights' + '/' + my_model
+        # pretraind_config_dir = parent_dir + '/pretrained_weights/gpt2_small'
+        pretrained_tokenizer_dir = pretraind_config_dir + '/tokenizer_left'
+        pretrained_weights_dir = pretraind_config_dir + '/model'
+        gpt_tokenizer = AutoTokenizer.from_pretrained(pretrained_tokenizer_dir)
+        target_model = TFAutoModelForCausalLM.from_pretrained(pretrained_weights_dir)
+        # target_model.resize_token_embeddings(len(gpt_tokenizer))
+
+    elif my_model == 'gpt_j':
+        '''
+        행동 정책 모델 (behavior policy model)
+        - 행동정책에는 .resize_token_embeddings()를 안하는게 확실히 맞음 !
+        '''
+        # 토크나이저 로드 및 모델 초기화
+        pretraind_config_dir = parent_dir + '/pretrained_weights' + '/' + my_model
+        # pretraind_config_dir = parent_dir + '/pretrained_weights/gpt2_small'
+        pretrained_tokenizer_dir = pretraind_config_dir + '/tokenizer_left'
+        pretrained_weights_dir = pretraind_config_dir + '/model'
+        gpt_tokenizer = AutoTokenizer.from_pretrained(pretrained_tokenizer_dir)
+        gpt_model = TFGPTJForCausalLM.from_pretrained(pretrained_weights_dir)
+        # gpt_model.resize_token_embeddings(len(gpt_tokenizer))
+
+
+        '''
+        타겟 정책 모델 (target policy model)
+        - 타겟정책에는 .resize_token_embeddings()를 하는데 맞음 !
+        '''
+        # 토크나이저 로드 및 모델 초기화
+        pretraind_config_dir = parent_dir + '/pretrained_weights' + '/' + my_model
+        # pretraind_config_dir = parent_dir + '/pretrained_weights/gpt2_small'
+        pretrained_tokenizer_dir = pretraind_config_dir + '/tokenizer_left'
+        pretrained_weights_dir = pretraind_config_dir + '/model'
+        gpt_tokenizer = AutoTokenizer.from_pretrained(pretrained_tokenizer_dir)
+        target_model = TFGPTJForCausalLM.from_pretrained(pretrained_weights_dir)
+        # target_model.resize_token_embeddings(len(gpt_tokenizer))        
+
+    elif my_model == 'trans_xl':
+        '''
+        행동 정책 모델 (behavior policy model)
+        - 행동정책에는 .resize_token_embeddings()를 안하는게 확실히 맞음 !
+        '''
+        # 토크나이저 로드 및 모델 초기화
+        pretraind_config_dir = parent_dir + '/pretrained_weights' + '/' + my_model
+        # pretraind_config_dir = parent_dir + '/pretrained_weights/gpt2_small'
+        pretrained_tokenizer_dir = pretraind_config_dir + '/tokenizer_left'
+        pretrained_weights_dir = pretraind_config_dir + '/model'
+        gpt_tokenizer = AutoTokenizer.from_pretrained(pretrained_tokenizer_dir)
+        gpt_model = TFTransfoXLLMHeadModel.from_pretrained(pretrained_weights_dir)
+        # gpt_model.resize_token_embeddings(len(gpt_tokenizer))
+
+        '''
+        타겟 정책 모델 (target policy model)
+        - 타겟정책에는 .resize_token_embeddings()를 하는데 맞음 !
+        '''
+        # 토크나이저 로드 및 모델 초기화
+        pretraind_config_dir = parent_dir + '/pretrained_weights' + '/' + my_model
+        # pretraind_config_dir = parent_dir + '/pretrained_weights/gpt2_small'
+        pretrained_tokenizer_dir = pretraind_config_dir + '/tokenizer_left'
+        pretrained_weights_dir = pretraind_config_dir + '/model'
+        gpt_tokenizer = AutoTokenizer.from_pretrained(pretrained_tokenizer_dir)
+        target_model = TFTransfoXLLMHeadModel.from_pretrained(pretrained_weights_dir)
+        # target_model.resize_token_embeddings(len(gpt_tokenizer))
 
     '''
     보상함수 모델 (reward function model)
@@ -262,7 +393,7 @@ elif my_task == 'train_eval' or my_task == 'test_eval':
 
     '''
     task == 'eval'를 통해 강화학습 된 GPT2와 BERT를 모두 불러오기
-    - GPT2는 model == '' 인자 설정에 따라 다른 모델이 로드됨 (e.g., gpt2-small, gpt2-large).
+    - GPT2는 model == '' 인자 설정에 따라 다른 모델이 로드됨 (e.g., gpt2-small, gpt2-large, trans_xl).
     - BERT는 dataset =='' 인자 설정에 따라 다른 모델이 로드됨 (e.g., sentiment, toxicity, politeness).
     '''
 
@@ -324,9 +455,8 @@ elif my_task == 'train_eval' or my_task == 'test_eval':
 
         # 훈련 가중치 주소 정의
         reinforced_weights_dir = parent_dir + '/weights' + '/' + my_dataset + '/' + my_model
-        my_model_rl_weights_dir = glob.glob(reinforced_weights_dir + '/*{}**{}**{}*'.format(my_decoding, my_dropout, my_dropout_rate))[0]
+        my_model_rl_weights_dir = glob.glob(reinforced_weights_dir + '/*{}**{}**{}'.format(my_decoding, my_dropout, my_dropout_rate))[0]
         print('my_model_rl_weights_dir :', my_model_rl_weights_dir)
 
         # 훈련 가중치 로드
-        # target_model.resize_token_embeddings(len(gpt_tokenizer))
         target_model.load_weights(tf.train.latest_checkpoint(my_model_rl_weights_dir))

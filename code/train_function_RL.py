@@ -119,6 +119,7 @@ def accuracy_function(real, pred, mask):
     return tf.cast(mean_acc, dtype = tf.float32)
     # return tf.cast(acc, dtype = tf.float32)
 
+
 '''
 최적화 알고리즘 : Adam Optimizer
 '''
@@ -146,6 +147,30 @@ def control_step(data, model):
 
     return tf.reduce_mean(losses), accuracies
     # return losses
+
+def control_step_trans_xl(data, model):
+
+    inputs, _, targets, targets_mask, rewards = data
+
+    with tf.GradientTape() as tape:
+
+        # 예측
+        outputs = model(inputs, training = True)
+
+        # 손실 계산
+        losses = loss_function(real=targets, pred=outputs.prediction_scores, mask=targets_mask)
+        accuracies = accuracy_function(real=targets, pred=outputs.prediction_scores, mask=targets_mask)
+
+        # 최종 손실
+        total_losses = losses * rewards
+
+    # 최적화
+    gradients = tape.gradient(total_losses, model.trainable_variables)
+    optimizers.apply_gradients(zip(gradients, model.trainable_variables))
+
+    return tf.reduce_mean(losses), accuracies
+    # return losses
+
 
 # %%
 '''
